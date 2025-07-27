@@ -24,41 +24,36 @@ public class CategoryController {
 
 	@Autowired
 	private Categoryservice categoryService;
-	
+
 	@GetMapping("/api/public/categories")
-	//@RequestMapping(value ="/api/public/categories"  , method = RequestMethod.GET) OR
-	public ResponseEntity<List<Category>> getAllCategories(){
+	// @RequestMapping(value ="/api/public/categories" , method = RequestMethod.GET)
+	// OR
+	public ResponseEntity<List<Category>> getAllCategories() {
 		List<Category> categories = categoryService.getCategories();
-		return new ResponseEntity<>(categories,HttpStatus.OK);
+		return new ResponseEntity<>(categories, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/api/public/category")
 	public ResponseEntity<String> addCategory(@Valid @RequestBody Category category) {
 		categoryService.createcategory(category);
-		return new ResponseEntity<>("Category Added Successfully !!",HttpStatus.CREATED);
+		return new ResponseEntity<>("Category Added Successfully !!", HttpStatus.CREATED);
 	}
-	
+
 	@DeleteMapping("/api/admin/category/{categoryId}")
 	public ResponseEntity<String> removeCategory(@PathVariable Long categoryId) {
-		try {
-			categoryService.deleteCategory(categoryId);
-			return new ResponseEntity<>("Category with categoryId : " + categoryId + " deleted successfully !!",
-					HttpStatus.OK);
-			// return ResponseEntity.ok(status); OR
-			// return ResponseEntity.status(HttpStatus.OK).body(status); OR
-		}catch(ResponseStatusException e) {
-			return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-		}
+
+		categoryService.deleteCategory(categoryId);
+		return new ResponseEntity<>("Category with categoryId : " + categoryId + " deleted successfully !!",
+				HttpStatus.OK);
+		// return ResponseEntity.ok(status); OR
+		// return ResponseEntity.status(HttpStatus.OK).body(status); OR
 	}
-	
+
 	@PutMapping("api/public/category/{categoryId}")
-	public ResponseEntity<String> updateCategory(@RequestBody Category category, @PathVariable Long categoryId){
-		try {
-			categoryService.updateCat(category,categoryId);
-			return new ResponseEntity<>("Category with CategoryId : "+ categoryId + " updated sucessfully !!",HttpStatus.OK);
-		}catch(ResponseStatusException e) {
-			return new ResponseEntity<>(e.getReason(),e.getStatusCode());
-		}
+	public ResponseEntity<String> updateCategory(@RequestBody Category category, @PathVariable Long categoryId) {
+
+		categoryService.updateCat(category, categoryId);
+		return new ResponseEntity<>("Category with CategoryId : " + categoryId + " updated sucessfully !!",
+				HttpStatus.OK);
 	}
 }
-

@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ecommerce.project.exceptions.APIException;
+import com.ecommerce.project.exceptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.repo.CategoryRepo;
 
@@ -21,11 +23,21 @@ public class CategoryServiceImpl implements Categoryservice{
 	
 	@Override
 	public List<Category> getCategories() {
-		return repo.findAll();
+		List<Category> categories = repo.findAll();
+		if(categories.isEmpty()) {
+			throw new APIException("No Category created till now !!!");
+		}
+		return categories;
 	}
 
 	@Override
 	public void createcategory(Category category) {
+		
+		Category existingCat = repo.findByCategoryName(category.getCategoryName());
+		if(existingCat != null) {
+			throw new APIException("Category with category name : " +category.getCategoryName() + " already exists !!!");
+		}
+		
 		/* category.setCategoryId(nextId++); */
 		repo.save(category);
 	}
@@ -34,7 +46,7 @@ public class CategoryServiceImpl implements Categoryservice{
 	public void deleteCategory(Long id) {
 		//Optimized code
 		Category existingcat = repo.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource Not Found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Category","categoryId",id));
 		repo.delete(existingcat);
 		/*
 		 * //normal code 
@@ -54,7 +66,7 @@ public class CategoryServiceImpl implements Categoryservice{
 		
 		//optimized code
 		Category existingCat = repo.findById(categoryId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource Not Found"));	
+				.orElseThrow(() -> new ResourceNotFoundException("Category","categoryId",categoryId));
 		existingCat.setCategoryName(category.getCategoryName());
 		repo.save(existingCat);
 		
