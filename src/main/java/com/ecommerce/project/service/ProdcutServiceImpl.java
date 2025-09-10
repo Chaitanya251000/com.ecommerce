@@ -6,6 +6,10 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,36 +69,71 @@ public class ProdcutServiceImpl implements ProductService{
 	}
 
 	@Override
-	public ProductResponse getProducts() {
-		List<Product> products = prodRepo.findAll();
+	public ProductResponse getProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+		
+		//pagination and sorting 
+		Sort sortByandOrder = sortDir.equalsIgnoreCase("asc")?
+								Sort.by(sortBy).ascending()
+								:Sort.by(sortBy).descending();
+		Pageable pageDetail = PageRequest.of(pageNumber, pageSize, sortByandOrder);
+		Page<Product> productPage = prodRepo.findAll(pageDetail);
+		
+		List<Product> products = productPage.getContent();
 		List<ProductDTO> productDTOList = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
 				.toList();
 		ProductResponse response = new ProductResponse();
 		response.setContent(productDTOList);
+		response.setPageNumber(productPage.getNumber());
+		response.setPageSize(productPage.getSize());
+		response.setTotalElements(productPage.getTotalElements());
+		response.setTotalPages(productPage.getTotalPages());
+		response.setLastPage(productPage.isLast());
 		return response;
 	}
 
 	@Override
-	public ProductResponse getProductByCat(Long categoryId) {
+	public ProductResponse getProductByCat(Long categoryId,Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
 		Category category = catRepo.findById(categoryId)
 				.orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
-		List<Product> products = prodRepo.findByCategory(category);
-
+		// pagination and sorting
+		Sort sortByandOrder = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending()
+				: Sort.by(sortBy).descending();
+		Pageable pageDetail = PageRequest.of(pageNumber, pageSize, sortByandOrder);
+		Page<Product> productPage = prodRepo.findByCategory(category,pageDetail);
+		List<Product> products = productPage.getContent();
+		
 		List<ProductDTO> productDTOList = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
 				.toList();
 		ProductResponse response = new ProductResponse();
 		response.setContent(productDTOList);
+		response.setPageNumber(productPage.getNumber());
+		response.setPageSize(productPage.getSize());
+		response.setTotalElements(productPage.getTotalElements());
+		response.setTotalPages(productPage.getTotalPages());
+		response.setLastPage(productPage.isLast());
 		return response;
 	}
 
 	@Override
-	public ProductResponse getByKeyword(String keyword) {
-		List<Product> products = prodRepo.findByProductNameLikeIgnoreCase('%' + keyword + '%');
+	public ProductResponse getByKeyword(String keyword,Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+		// pagination and sorting
+		Sort sortByandOrder = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending()
+				: Sort.by(sortBy).descending();
+		Pageable pageDetail = PageRequest.of(pageNumber, pageSize, sortByandOrder);
+		
+		Page<Product> productPage = prodRepo.findByProductNameLikeIgnoreCase('%' + keyword + '%',pageDetail);
+		List<Product> products = productPage.getContent();
+		
 		List<ProductDTO> productDTOList = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
 				.toList();
 		ProductResponse response = new ProductResponse();
 		response.setContent(productDTOList);
+		response.setPageNumber(productPage.getNumber());
+		response.setPageSize(productPage.getSize());
+		response.setTotalElements(productPage.getTotalElements());
+		response.setTotalPages(productPage.getTotalPages());
+		response.setLastPage(productPage.isLast());
 		return response;
 	}
 
